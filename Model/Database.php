@@ -25,7 +25,6 @@ class Database {
  
             return $result;
         } catch(Exception $e) {
-            //var_dump($e->getMessage());
             throw New Exception( $e->getMessage() );
         }
         return false;
@@ -41,7 +40,6 @@ class Database {
 
             return $result;
         } catch(Exception $e) {
-            //var_dump($e->getMessage());
             throw New Exception( $e->getMessage() );
         }
         return false;

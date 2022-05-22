@@ -15,9 +15,16 @@ class movimientosModel extends Database
     }
 
 
-    public function getGananciasMes($datos){
+    public function getGanaciasPorMes($datos){
 
         $sql = 'SELECT (SUM(ingreso) - SUM(egreso)) AS ganancias FROM `movimientos` WHERE DATE_FORMAT(fecha, "%Y-%m") = "'.$datos[0]['fecha_transaccion'].'";';
+        return $this->select($sql);
+    }
+
+    public function getGananciasTotal(){
+        $sql = 'SELECT (SUM(ingreso) - SUM(egreso)) AS ganancias, DATE_FORMAT(fecha, "%Y-%m") AS fecha
+                FROM movimientos
+                GROUP BY DATE_FORMAT(fecha, "%Y-%m")';
         return $this->select($sql);
     }
 }
