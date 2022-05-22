@@ -33,25 +33,58 @@
 
     </head>
 
-    <body>
+    <body class="total">
         <div id="app_transaccion">
             <div class="container">
                 <div class="row">
-                    <div class="col-4">
-                        <div class="dropdown">
-                            <button class="mainmenubtn">Menú Principal</button>
-                            <div class="dropdown-child">
-                                <a href="javascript:" @click="iniciar_ing_trans()">Ingresar Transacción</a>
-                                <a href="javascript:" @click="iniciar_ver_ganancias()">Ver Ganancias por Mes</a>
-                            </div>
-                        </div>
+                    <div class="col-4 left">
+
+                        <ul class="nav flex-column mainmenubtn">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="javascript:" @click="iniciar_home()">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:" @click="iniciar_ing_trans()">Ingresar Transacción</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="javascript:" @click="iniciar_ver_ganancias()">Ver Ganancias por Mes</a>
+                            </li>
+
+                        </ul>
+
                     </div>
 
 
+                    <div class="col-8 centro" >
+                        <br>
+                        <div class="row" id="total" v-if="menu_general == true">
+                            <div class="col-12">
+                                <h1>Ganancias Total Por Mes</h1>
+                                <br>
+                                <div class="form-group">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Total Ganancias</th>
+                                                <th scope="col">Año/Mes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template v-for="(ganancia, index) in array_ganancias">
+                                                <tr>
+                                                    <th>{{index+1}}</th>
+                                                    <th>${{ganancia['ganancias']}}</th>
+                                                    <th>{{ganancia['fecha']}}</th>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
 
-
-                    <div class="col-8" id="ganancias" v-if="menu_ganancia == true" >
-                        <div class="row">
+                        <div class="row" id="ganancias" v-if="menu_ganancia == true">
                             <div class="col-12">
                                 <h1>
                                     Ver Ganancias por Mes
@@ -60,7 +93,7 @@
 
 
                                 <div class="form-group">
-                                    Selecionar Fecha 
+                                    Seleccionar Mes: 
                                 </div>
                                 <div class="form-group">
                                     <vuejs-datepicker
@@ -71,27 +104,30 @@
                                         v-bind:bootstrap-styling="true"
                                         minimum-view="month" 
                                         calendar-button-icon="fa fa-calendar"
+                                        :disabled-dates="state.disabledDates"
                                          >
                                     </vuejs-datepicker>
 
                                 </div>
                                 <br>
 
+                                <div class="alert alert-danger" role="alert" v-if="error_ganancias">
+                                    Ingrese una fecha para ver las ganancias de ese mes.
+                                </div>
+
                                 <div class="form-group" v-if="ver_ganancias == true">
-                                    Ganancias obtenidas durante el mes de {{ver_fecha_gan}} son de {{total_ganancias}}
+                                    <h4>
+                                        Ganancias obtenidas durante el mes de {{ver_fecha_gan}} son de ${{total_ganancias}}
+                                    </h4>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="button" class="btn btn-primary" value="Ver" @click="verGanancias()">
+                                    <input type="button" class="btn btn-success" value="Ver" @click="verGanancias()">
                                 </div>
                             </div>
                         </div>
-        
-                    </div>
 
-
-                    <div class="col-8" id="transaccion" v-if="menu_ingresar == true" >
-                        <div class="row">
+                        <div class="row" id="transaccion" v-if="menu_ingresar == true">
                             <div class="col-12">
                                 <h1>
                                     Ingresar Transacci&oacute;n
@@ -136,18 +172,24 @@
                                         v-bind:calendar-button="true"
                                         v-bind:monday-first="true"
                                         v-bind:bootstrap-styling="true"
-                                        calendar-button-icon="fa fa-calendar" >
+                                        calendar-button-icon="glyphicon glyphicon-calendar"
+                                        :disabled-dates="state.disabledDates" >
                                     </vuejs-datepicker>
 
                                 </div>
                                 <br>
+
+                                <div class="alert alert-danger" role="alert" v-if="ver_error == true">
+                                    Favor revisar Formulario y llenar todos los datos.
+                                </div>
+
                                 <div class="form-group">
                                     <input type="button" class="btn btn-primary" value="Guardar" @click="guardarTransaccion()">
                                 </div>
                             </div>
                         </div>
-        
-                    </div>
+                    </div>                
+
                 </div>
 
 
@@ -179,6 +221,12 @@
 
 
 <script type="text/javascript">
+
+    $(window).ready(function() {
+        app_transaccion.iniciar_app();
+    });
+
+
     $( function() {
         $( "#datepicker" ).datepicker();
     } );
@@ -206,21 +254,36 @@
 
             menu_ingresar:false,
             menu_ganancia:false,
+            menu_general:false,
 
             ver_ganancias: false,
 
-            status_response: false,
+            ver_error: false,
+            error_ganancias: false,
 
-            titulo_modal: 'Ingresar Transacci�n',
-            msj_modal: 'Transacci�n realizada correctamente',
+            array_ganancias: [],
 
-            url_guardar: 'http://localhost/Mantenedor-de-finanzas-Desafio_dentidesk/index.php/movimientos/guardar',
-            url_ganancia: 'http://localhost/Mantenedor-de-finanzas-Desafio_dentidesk/index.php/movimientos/ganancias',
+            state: {
+                disabledDates: {
+                    from: new Date(Date.now()),
+                }
+            },
+
+            titulo_modal: 'Ingresar Transacción',
+            msj_modal: 'Transacción realizada correctamente',
+
+            url_guardar: '/Mantenedor-de-finanzas-Desafio_dentidesk/index.php/movimientos/guardar',
+            url_ganancia: '/Mantenedor-de-finanzas-Desafio_dentidesk/index.php/movimientos/ganancias',
+            url_ganaciasTotal: '/Mantenedor-de-finanzas-Desafio_dentidesk/index.php/movimientos/gananciasTotal',
 
             
         },
 
         methods: {
+
+            iniciar_app: function () {
+                this.gananciasTotal();
+            },
 
             formatDate: function (date,tipo) {
                 var d = new Date(date),
@@ -279,51 +342,129 @@
             iniciar_ing_trans: function(){
                 this.menu_ingresar = true;
                 this.menu_ganancia = false;
+                this.menu_general = false;
             },
-
+            
             iniciar_ver_ganancias: function(){
                 this.menu_ingresar = false;
                 this.menu_ganancia = true;
+                this.menu_general = false;
+            },
+
+            iniciar_home:function(){
+                this.menu_ingresar = false;
+                this.menu_ganancia = false;
+                this.menu_general = true;
+            },
+
+
+            async gananciasTotal(){
+                const response = await axios.get(this.url_ganaciasTotal);
+                 
+                if(response.data.status == true){
+
+                    var obj = response.data.datos;
+
+                    for (let x = 0; x < obj.length; x++) {
+                        const element = obj[x];
+                        
+                        const obj_ganancia = {
+                            "fecha":obj[x]['fecha'],
+                            "ganancias":new Intl.NumberFormat().format(obj[x]['ganancias']),
+                        };
+   
+                        this.array_ganancias.push(obj_ganancia);
+                    }
+
+
+                    this.menu_general = true;
+                    this.menu_ingresar = false;
+                    this.menu_ganancia = false;
+                }
             },
 
             async guardarTransaccion () {
 
                 var fecha = this.formatDate(this.fecha_trans,'guardar');
 
-                const datos = {
-                    monto_ingreso: this.monto_ingreso,
-                    monto_egreso: this.monto_egreso,
-                    fecha_transaccion: fecha,
-                };
+                var validar = 0;
 
-                const response = await axios.post(this.url_guardar,datos);
-                 
-                if(response.data.status == true){
-                        
-                    $("#text_modal").modal('show');
-                    this.limpiar_formulario();
+                if(this.fecha_trans === ""){
+                    validar++;
                 }
+
+                if(this.tipo_trans == 1){
+                    if(this.monto_ingreso == 0){
+                        validar++;
+                    }
+                }else{
+                    if(this.monto_egreso == 0){
+                        validar++;
+                    }
+                }
+
+                if(validar == 0){
+                    const datos = {
+                        monto_ingreso: this.monto_ingreso,
+                        monto_egreso: this.monto_egreso,
+                        fecha_transaccion: fecha,
+                    };
+
+
+                    const response = await axios.post(this.url_guardar,datos);
+                    
+                    if(response.data.status == true){
+                            
+                        $("#text_modal").modal('show');
+                        this.limpiar_formulario();
+                        this.gananciasTotal();
+                    }
+                }else{
+                    this.ver_error = true;
+
+                    setTimeout(() => {
+                        this.ver_error = false;
+                    }, 5000);
+                }
+
+                
             },
 
 
             async verGanancias(){
                 var fecha = this.formatDate(this.fecha_ganancias,'ganancia');
 
-                const datos = {
-                    fecha_transaccion: fecha,
-                };
                 
+                var validar = 0;
 
-                const response = await axios.post(this.url_ganancia,datos);
-
-                this.status_response = response.data.status;
-
-                if(this.status_response == true){
-                    this.total_ganancias = response.data.arrGanancias; 
-                    this.ver_fecha_gan = response.data.fecha;
-
-                    this.ver_ganancias = true;
+                if(this.fecha_ganancias === ""){
+                    validar++;
                 }
+
+                if(validar == 0){
+                    const datos = {
+                        fecha_transaccion: fecha,
+                    };
+                    
+
+                    const response = await axios.post(this.url_ganancia,datos);
+
+                    if(response.data.status == true){
+                        this.total_ganancias = new Intl.NumberFormat().format(response.data.arrGanancias); 
+
+                        this.ver_fecha_gan = response.data.fecha;
+
+                        this.ver_ganancias = true;
+                    }
+                }else{
+                    this.error_ganancias = true;
+
+                    setTimeout(() => {
+                        this.error_ganancias = false;
+                    }, 5000);
+                }
+
+                
 
             },
         

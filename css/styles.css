@@ -1,5 +1,5 @@
 .mainmenubtn {
-    background-color: skyblue;
+    background-color: rgb(179, 179, 179);
     color: white;
     border: none;
     cursor: pointer;
@@ -8,7 +8,7 @@
 }
 
 .mainmenubtn:hover {
-    background-color: blue;
+    background-color: rgba(57, 57, 58, 0.838);
 }
 
 .dropdown {
@@ -31,4 +31,17 @@
 
 .dropdown:hover .dropdown-child {
     display: block;
+}
+
+
+.total{
+    background-color: rgb(191, 238, 222);
+}
+
+.left{
+    background-color: antiquewhite;
+}
+
+.centro{
+    background-color: beige;
 }
