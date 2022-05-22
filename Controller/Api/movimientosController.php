@@ -2,14 +2,14 @@
 class movimientosController extends BaseController{
 
     /**
-     * "/movimientos/list" Endpoint - Obtiene lista de movimentos
+     * /movimientos/list Endpoint - Obtiene lista de movimentos
+     * GET
      */
     public function listAction(){
         $strErrorDesc = '';
         $requestMethod = $_SERVER["REQUEST_METHOD"];
         $arrQueryStringParams = $this->getQueryStringParams();
 
- 
         if (strtoupper($requestMethod) == 'GET') {
             try {
                 $movimientosModel = new movimientosModel();
@@ -46,6 +46,7 @@ class movimientosController extends BaseController{
 
     /**
      * /movimientos/guardar EndPoint - Inserta un nuevo registro
+     * POST
      */
     public function guardarAction(){
 
@@ -90,6 +91,7 @@ class movimientosController extends BaseController{
 
     /**
      * /movimientos/ganancias EndPoint - Obtiene las ganancias de un mes
+     * POST
      */
     public function gananciasAction(){
 
@@ -103,7 +105,7 @@ class movimientosController extends BaseController{
             
                 $ganancias = 0;
  
-                $arrGanancias = $movimientosModel->getGananciasMes($arrQueryStringParams);
+                $arrGanancias = $movimientosModel->getGanaciasPorMes($arrQueryStringParams);
 
                 if($arrGanancias[0]['ganancias'] != NULL){
                     $ganancias = $arrGanancias[0]['ganancias'];
@@ -137,4 +139,46 @@ class movimientosController extends BaseController{
         }
     }
 
+
+    /**
+     * /movimientos/gananciasTotal EndPoint - Obtiene las ganancias agrupadas por mes
+     * GET
+     */
+    public function gananciasTotalAction(){
+        $strErrorDesc = '';
+        $requestMethod = $_SERVER["REQUEST_METHOD"];
+        $arrQueryStringParams = $this->getQueryStringParams();
+
+        if (strtoupper($requestMethod) == 'GET') {
+            try {
+                $movimientosModel = new movimientosModel();
+ 
+                $arrGananciasTotal = $movimientosModel->getGananciasTotal();
+                
+                $salida['status'] = true;
+                $salida['datos'] = $arrGananciasTotal;
+                
+                $responseData = json_encode($salida);
+
+            } catch (Error $e) {
+                $strErrorDesc = $e->getMessage().'Algo Salio Mal! Favor contactar Soporte.';
+                $strErrorHeader = 'HTTP/1.1 500 Internal Server Error';
+            }
+        } else {
+            $strErrorDesc = 'Metodo no compatible';
+            $strErrorHeader = 'HTTP/1.1 422 Unprocessable Entity';
+        }
+ 
+        // send output
+        if (!$strErrorDesc) {
+            $this->sendOutput(
+                $responseData,
+                array('Content-Type: application/json', 'HTTP/1.1 200 OK')
+            );
+        } else {
+            $this->sendOutput(json_encode(array('error' => $strErrorDesc)), 
+                array('Content-Type: application/json', $strErrorHeader)
+            );
+        }
+    }
 }

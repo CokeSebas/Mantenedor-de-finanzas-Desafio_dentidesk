@@ -57,40 +57,6 @@ class BaseController{
         return $datos;
     }
     
-
-    /*
-    protected function postQueryStringParams(){
-        $datos = [];
-        $input = file_get_contents('php://input');
-        $input = explode(",",$input);
-
-        //var_dump($input);
-        //exit;
-
-        foreach ($input as $key => $data) {
-
-            var_dump($data);
-            exit;
-
-            $data = str_replace("{", "",$data);
-            $data = str_replace("}", "",$data);
-            $data = str_replace('"', '', $data);
-            $data = explode(":",$data);
-
-            $datos[] = [
-                $data[0] => $data[1],
-            ];
-
-        }
-
-        var_dump($datos);
-        exit;
-
-        return $datos;
-    }
-    
-    */
-
  
     /**
      * Send API output.
